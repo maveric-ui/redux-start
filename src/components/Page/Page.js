@@ -1,14 +1,53 @@
-import React, {Component} from 'react';
+import React, { PureComponent } from 'react';
 import './Page.less'
 import PropTypes from 'prop-types';
 
-class Page extends Component {
-  render() {
-    const { year, photos } = this.props;
+export class Page extends PureComponent {
+  createButtonTemplate = () => {
+    const yearArray = [2018, 2017, 2016, 2015, 2014];
     return (
-      <div>
-        <p>You have: {photos.length} photos in {year}!</p>
-      </div>
+        yearArray.map((year, index) => {
+          return <button key={index} className="btn" onClick={this.onBtnClick}>{year}</button>
+        })
+    )
+  };
+
+  renderTemplate = () => {
+    const {photos, isFetching, error} = this.props;
+
+    if (error) {
+      return <p className="error">Во время загрузки фото произошла ошибка</p>
+    }
+
+    if (isFetching) {
+      return <p>Загрузка...</p>
+    } else {
+      return photos.map((entry) => (
+          <div key={entry.id} className="photo">
+            <p>
+              <img src={entry.sizes[0].url} alt=""/>
+            </p>
+            <p>{entry.likes.count} ❤</p>
+          </div>
+      ))
+    }
+  };
+
+  onBtnClick = e => {
+    const year = +e.currentTarget.innerText;
+    this.props.getPhotos(year);
+  };
+
+  render() {
+    const {year, photos} = this.props;
+    return (
+        <div className="ib page">
+          <p>
+            {this.createButtonTemplate()}
+          </p>
+          <h3>{year} year [{photos.length}]</h3>
+          {this.renderTemplate()}
+        </div>
     )
   }
 }
@@ -16,6 +55,9 @@ class Page extends Component {
 Page.propTypes = {
   year: PropTypes.number.isRequired,
   photos: PropTypes.array.isRequired,
+  getPhotos: PropTypes.func.isRequired,
+  error: PropTypes.string,
+  isFetching: PropTypes.bool.isRequired,
 };
 
 export default Page;

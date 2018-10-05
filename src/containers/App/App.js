@@ -3,31 +3,48 @@ import {connect} from 'react-redux';
 import './App.less';
 import User from '../../components/User/User';
 import Page from '../../components/Page/Page';
+import { getPhotos } from '../../actions/PageActions';
+import { handleLogin } from '../../actions/UserActions';
 
 
 class App extends Component {
   render() {
-    const { user, page } = this.props;
-
+    const { user, page, getPhotosAction, handleLoginAction } = this.props;
     return (
-        <div className="App">
-          <header className="App-header">
-            <h1 className="App-title">Мой топ фото</h1>
-          </header>
-          <p className="App-intro">Здесь будут мои самые залайканые фото</p>
-          <User name={user.name}/>
-          <Page photos={page.photos} year={page.year}/>
+        <div className="app">
+          <Page
+              photos={page.photos}
+              year={page.year}
+              isFetching={page.isFetching}
+              getPhotos={getPhotosAction}
+              error={page.error}
+          />
+          <User
+              name={user.name}
+              isFetching={user.isFetching}
+              error={user.error}
+              handleLogin={handleLoginAction}
+          />
         </div>
-    );
+    )
   }
 }
 
 const mapStateToProps = store => {
-  console.log(store);
   return {
     user: store.user,
     page: store.page,
   }
 };
 
-export default connect(mapStateToProps) (App);
+const mapDispatchToProps = dispatch => {
+  return {
+    getPhotosAction: year => dispatch(getPhotos(year)),
+    handleLoginAction: () => dispatch(handleLogin())
+  }
+};
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(App)
